@@ -1,0 +1,23 @@
+#! /bin/bash
+
+	#flatpak info
+	FSA=$(flatpak --supported-arches)
+	FGL=$(flatpak --gl-drivers)
+	FPI=$(flatpak --installations)
+	FPU=$(flatpak --print-updated-env)
+	#pkexec info
+	PVR=$(pkexec --version); zenity --notification --text="Running $PVR"
+	#sudo info
+	SVR=$(sudo --version); zenity --notification --text="Running $SVR"
+	#yad info
+	YVR=$(yad --version); zenity --notification --text="Running YAD $YVR"
+	#zenity info
+	ZVR=$(zenity --version); zenity --notification --text="GUI notifications spawned with zenity $ZVR"
+
+	zenity --notification --text="Running flatback version $vers, supporting $FSA."
+	zenity --notification --text="Running flatpak version $FPV"
+	zenity --notification --text="GUI elements rendered using zenity $ZVR and yad $YVR"
+
+	zenity --notification --text="Active gl drivers: $FGL"
+	zenity --notification --text="Installation path: $FPI"
+	zenity --notification --text="Environment required: $FPU"
