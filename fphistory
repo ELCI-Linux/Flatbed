@@ -1,0 +1,46 @@
+#! /bin/bash
+
+vers="1.0"
+
+	source /etc/flatbed/config
+
+
+	if [ ${#EB} -eq "0" ]; then
+	EB="Exit"
+	fi
+
+
+	fields=$(flatpak history --help |\
+        cut -f 1 | tail -n 19 | head -n -3 |\
+	awk '{print $1}' |\
+        zenity --list --checklist \
+	--title="$header - flatpak history ..." \
+	--text="Select the fields to include" \
+	--column="" --column="" | tr "|" "," )
+
+        if [ ${#fields} -eq "0" ]; then
+        FIELDS=""
+        else
+        FIELDS="--columns=$fields"
+        fi
+
+	length=$(flatpak history | wc -l)
+	let ' add = length * 10 '
+	let ' height = add + 100 '
+	history=$(flatpak history $FIELDS| \
+	yad --list --center \
+	--title="$header - Flatpak History" \
+	--text="Here is your flatpak history" \
+	--column="" --column="" \
+	--height=$height --width=600 \
+	--no-headers --hide-column=1 \
+	--print-all \
+	--button="Export Data":0 \
+	--button="$EB":1)
+
+	if [ $? -eq "0" ]; then
+	save=$(yad --file --save)
+	flatpak history $FIELDS | lolcat >> $save
+	else
+	exit
+	fi
