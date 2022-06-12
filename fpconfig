@@ -1,0 +1,90 @@
+#! /bin/bash
+
+# This script performs the 'flatpak config' command, as well as all options.
+
+	# Exit Button
+	if [ ${#EB} -eq "0" ]; then
+	EB="Exit"
+	fi
+
+	# The user is prompted to identify the installation they wish to work on
+
+ 	CONFIG=$(flatpak config)
+
+	action=$(yad --list \
+	--title="$header - Flatpak config action" \
+	--text="Select an action to perform" \
+	--column="" --noheaders \
+	"Get" "List" "Set" "Unset")
+
+	if [[ $action == *"Get"* ]]; then
+		GETS=$(flatpak config --list | \
+		cut -f 1 -d ":" | \
+		yad --list \
+		--title="$header - flatpak config [get]" \
+		--text="Select a key to see it's value" \
+		--column=""| \
+		 cut -f 1 -d "|")
+
+		if [ ${#GETS} -gt "0" ]; then
+		GOT=$(flatpak config --get $GETS)
+		zenity --info --title="$header - flatpak config [--get] $GETS" \
+		--text="The variable $GETS is set to: $GOT"
+		fi
+	else
+
+	# The users selection is used then set as the 'INS' variable
+	# If the user selected 'non-default...' they are prompted to enter the installation name
+		if [[ $base == *"user"* ]]; then
+		INS="--user"
+		elif [[ $base == *"non-default"* ]]; then
+		INS_NAME=$(zenity --entry --title="$header - flatpak config" \
+		--text="Enter the installation name")
+		INS="--$INS_NAME"
+		elif [[ $base == *"system"* ]]; then
+		INS="--system"
+		fi
+	fi
+
+	if [[ $action == *"List"* ]]; then
+
+		LIST=$(flatpak config --list)
+
+		zenity --info --title="$header - flatpak config [--list]" \
+		--text="Current configuration keys and values: $LIST"
+	elif [[ $action == *"Set"* ]]; then
+		SET=$(flatpak config --list | \
+		cut -f 1 -d ":" \
+		yad --list \
+		--title="$header - flatpak config [--set]" \
+		--text="Select a key to set")
+
+		current=$(flatpak config --get $SET)
+
+		SETTING=$(zenity --entry --title="$header - flatpak config [--set] $SET ..." \
+		--text="enter a new value for $SET" --entry-text="$current")
+
+#		if [[ $rit_mode == *"off"* ]]; then
+		flatpak config --set $SET $SETTING
+#		elif [[ $rit_mode == *"on"* ]]; then
+#		terminator --command='flatpak config --set $SET $SETTING'
+#		fi
+	elif [[ $action == *"Unset"* ]]; then
+		UNSET=$(flatpak config --list |\
+		cut -f 1 -d ":" \
+		yad --list \
+		--title="$header - flatpak config [--unset]..." \
+		--text="Select a key to unset configuration")
+
+#		if [[ $rit_mode == *"off"* ]]; then
+		flatpak config --unset $UNSET
+#		elif [[ $rit_mode == *"on"* ]]; then
+#		terminator --command='flatpak config --unset $UNSET'
+#		fi
+	fi
+
+
+
+                config="0"
+                flatback="0"
+
