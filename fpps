@@ -1,0 +1,42 @@
+#! /bin/bash
+
+	source /etc/flatbed/config
+
+	if [ ${#EB} -eq "0" ]; then
+	EB="Exit"
+	fi
+
+	running=$(flatpak ps)
+	close=""
+	while [ ${#close} -eq "0" ]; do
+
+		# If no flatpaks are running...
+		if [ ${#running} -eq "0" ]; then
+		xcowsay --image=$sys_cow "No flatpaks are currently running" || \
+		zenity --nsotification --text="No flatpaks are currently running"
+		close="1"
+		# If at least one flatpak is running...
+		elif [ ${#running} -gt "0" ]; then
+		# The variable 'fpps' is set the output selected
+		fpps=$(flatpak ps | yad --list \
+				--title="$header - Running flatpaks (ps)" \
+				--text="The following flatpaks are running" \
+				--column="" --no-headers \
+				--button="Info":0 --button="Kill":'flatpak kill $fpps' --button="$EB":1 | \
+				 cut -f 1 -d "|" | cut -f 3)
+
+				# If the User selcted the info button...
+				if [ $? -eq "0" ]; then
+				export INFO_ID="$fpps"
+				./fpinfo
+				# If the user selected the kill button
+				elif [ $kill -eq "1" ]; then
+				kill=$(echo $fpps | cut -f 1 -d " " )
+				flatpak kill $kill
+				kill="0"
+				# If the user selected exit/return to main menu
+				elif [ $? -eq "1" ]; then
+				close="1"
+				fi
+		fi
+	done
